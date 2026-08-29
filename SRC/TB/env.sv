@@ -1,0 +1,46 @@
+class env extends uvm_env;
+  
+  `uvm_component_utils(env)
+  
+  input_agent inp_agnt_h;
+  output_agent out_agnt_h;
+  scoreboard sb_h;
+  subscriber sub_h;
+  
+  fifo_cfg c_h;
+  
+  function new(string name="env",uvm_component parent);
+    super.new(name,parent);
+  endfunction
+  
+  function void build_phase(uvm_phase phase);
+    super.build_phase(phase);
+    
+    if(!uvm_config_db#(fifo_cfg)::get(this,"","fifo_cfg",c_h))
+      `uvm_fatal(get_type_name(),"Output_agent Getting Failed");
+    
+    inp_agnt_h = input_agent::type_id::create("inp_agnt_h",this);
+    out_agnt_h = output_agent::type_id::create("out_agnt_h",this);
+    sb_h = scoreboard::type_id::create("sb_h",this);
+  
+    sub_h = subscriber::type_id::create("sub_h", this);
+  
+  endfunction
+  
+  function void connect_phase(uvm_phase phase);
+    
+    super.connect_phase(phase);
+    
+	inp_agnt_h.im_h.inp_mon_port.connect(sb_h.inp_mon_fifo.analysis_export);
+	out_agnt_h.om_h.out_mon_port.connect(sb_h.out_mon_fifo.analysis_export);
+    
+    inp_agnt_h.im_h.inp_mon_port.connect(sub_h.analysis_export);
+    
+ endfunction
+
+endclass
+  
+
+	
+  
+
